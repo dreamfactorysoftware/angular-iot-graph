@@ -1,0 +1,32 @@
+{
+  "name": "iot",
+  "label": "Iot",
+  "plural": "Iots",
+  "primary_key": "id",
+  "field": [
+    {
+      "name": "id",
+      "label": "Id",
+      "type": "id"
+    },
+    {
+      "name": "created_date",
+      "label": "Created Date",
+      "type": "timestamp_on_create"
+    },
+    {
+      "name": "device_id",
+      "label": "Device ID",
+      "type": "integer"
+    },
+    {
+      "name": "temp",
+      "label": "Temp",
+      "type": "decimal",
+      "db_type": "decimal(10,1)",
+      "length": 10,
+      "precision": 10,
+      "scale": 1
+    }
+  ]
+}

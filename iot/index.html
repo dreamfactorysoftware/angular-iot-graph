@@ -1,11 +1,8 @@
 <!DOCTYPE html>
-<html data-ng-app = "iotApp">
+<html data-ng-app="iotApp">
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title> Report Data</title>
-
-
-
+    <title>DreamFactory IoT</title>
 </head>
 <body>
 <script type='text/javascript' src='//code.jquery.com/jquery-1.9.1.js'></script>
@@ -15,13 +12,10 @@
 <script src="//code.highcharts.com/modules/exporting.js"></script>
 <script src="js/moment.js"></script>
 <script src="js/app.js"></script>
-
-<div  data-ng-controller = "iotController" id="container" style="min-width: 310px; height: 400px; margin: 0 auto">
-<div id="reports-container">
-    <highchart style="height:300px" id="chart1" config="chartConfig"></highchart>
-</div>
+<div ng-app="iotApp">
+    <div ng-controller="iotCtl">
+        <highchart style="height:300px" id="chart1" config="chartConfig"></highchart>
+    </div>
 </div>
 </body>
-
-
 </html>

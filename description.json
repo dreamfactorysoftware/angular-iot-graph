@@ -1,0 +1,8 @@
+{
+	"api_name":"iot",
+	"name":"IoT",
+	"description":"A demo AngularJS app that charts sensor data stored in a database.",
+	"is_active":1,
+	"url":"/index.html",
+	"is_url_external":0
+}
