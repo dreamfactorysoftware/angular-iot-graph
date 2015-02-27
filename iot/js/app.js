@@ -4,6 +4,15 @@ var iotApp = angular.module('iotApp', ["highcharts-ng"]);
 
 iotApp.controller('iotCtl', function ($scope, $http, $interval) {
 
+    // If you launch this app from inside the admin console,
+    // the session from your admin console will be used. When
+    // it expires the REST calls will start to fail. To avoid this
+    // you can enter credentials here to be sent with each call.
+    $scope.credentials = {
+        username: 'your DSP admin email',
+        password: 'your DSP password'
+    };
+
     $scope.chartConfig = {
         options: {
             chart: {
@@ -71,7 +80,9 @@ iotApp.controller('iotCtl', function ($scope, $http, $interval) {
         }
         url = location.protocol + "//" + location.host + "/rest/" + svc + "/iot/";
         url += "?app_name=iot&method=GET&order=created_date asc&filter=" + filter;
-        $http.post(url, params).then(
+        $http.post(url, params, {
+            headers: { "Authorization": "Basic " + btoa($scope.credentials.username + ":" + $scope.credentials.password) }
+        }).then(
             function (res) {
                 $scope.chartConfig.series.forEach(function (series) {
                     series.data = [];
