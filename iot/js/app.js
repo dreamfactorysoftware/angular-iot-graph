@@ -1,13 +1,8 @@
+var useMongo = false;
+
 var iotApp = angular.module('iotApp', ["highcharts-ng"]);
 
 iotApp.controller('iotCtl', function ($scope, $http, $interval) {
-
-    // Credentials are not required here. You can also create a role and allow guest access.
-    // But specifying credentials here is the easiest way to get the app up and running quickly.
-    $scope.credentials = {
-        username: 'your DSP admin email',
-        password: 'your DSP password!'
-    }
 
     $scope.chartConfig = {
         options: {
@@ -16,7 +11,7 @@ iotApp.controller('iotCtl', function ($scope, $http, $interval) {
             },
             xAxis: {
                 type: 'datetime',
-                title : {text: 'Time'},
+                title : {text: 'Time (GMT)'},
                 labels: {
                     enabled: true,
                     format: '{value:%H:%M}',
@@ -51,25 +46,47 @@ iotApp.controller('iotCtl', function ($scope, $http, $interval) {
         loading: false
     };
 
-    $scope.loadReports = function() {
+    $scope.loadReportData = function() {
 
-        var device, date;
-        var date60MinutesAgo = moment().subtract(60, 'minutes').format('YYYY-MM-DD HH:mm:ss');
-        var url = location.protocol + "//" + location.host + "/rest/db/iot/";
-        url += "?app_name=iot&filter=created_date>'" + date60MinutesAgo + "'";
-        url += "&order=created_date asc";
-        $http.get(url, {
-            headers: { "Authorization": "Basic " + btoa($scope.credentials.username + ":" + $scope.credentials.password) }
-        }).then(
-            function(res) {
-                $scope.chartConfig.series.forEach(function(series) {
+        var date60MinutesAgo, filter, svc, params, url, device, date;
+
+        date60MinutesAgo = moment().subtract(60, 'minutes').format('YYYY-MM-DD HH:mm:ss');
+        filter = "created_date >= :date";
+        if (useMongo) {
+            svc = "mongo";
+            params = {
+                "params": {
+                    ":date": {
+                        "$date": date60MinutesAgo
+                    }
+                }
+            }
+        } else {
+            svc = "db";
+            params = {
+                "params": {
+                    ":date": date60MinutesAgo
+                }
+            }
+        }
+        url = location.protocol + "//" + location.host + "/rest/" + svc + "/iot/";
+        url += "?app_name=iot&method=GET&order=created_date asc&filter=" + filter;
+        $http.post(url, params).then(
+            function (res) {
+                $scope.chartConfig.series.forEach(function (series) {
                     series.data = [];
                 });
-                res.data.record.forEach(function(record) {
-                    device = record.device_id - 1;
-                    if (device < $scope.chartConfig.series.length) {
-                        date = new Date(record.created_date);
-                        $scope.chartConfig.series[device].data.push([date.getTime(), record.temp]);
+                res.data.record.forEach(function (record) {
+                    if (record.created_date) {
+                        device = record.device_id - 1;
+                        if (device < $scope.chartConfig.series.length) {
+                            if (useMongo) {
+                                date = new Date(record.created_date.$date).getTime();
+                            } else {
+                                date = new Date(record.created_date).getTime();
+                            }
+                            $scope.chartConfig.series[device].data.push([date, record.temp]);
+                        }
                     }
                 });
             }
@@ -77,8 +94,8 @@ iotApp.controller('iotCtl', function ($scope, $http, $interval) {
     };
 
     $interval(function() {
-        $scope.loadReports();
+        $scope.loadReportData();
     }, 5000);
 
-    $scope.loadReports();
+    $scope.loadReportData();
 });
